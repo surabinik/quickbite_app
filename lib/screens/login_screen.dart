@@ -3,22 +3,40 @@ import 'package:provider/provider.dart';
 
 import '../providers/user_provider.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
-  void _onLogin(BuildContext context) {
-    Provider.of<UserProvider>(context, listen: false).loginAsStudent();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Welcome back! Login successful.'),
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-    Navigator.pushReplacementNamed(context, '/home');
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
-  void _onGuestAccess(BuildContext context) {
+  void _onLogin() {
+    if (_formKey.currentState!.validate()) {
+      Provider.of<UserProvider>(context, listen: false).loginAsStudent();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Welcome back! Login successful.'),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+  }
+
+  void _onGuestAccess() {
     Provider.of<UserProvider>(context, listen: false).loginAsGuest();
     Navigator.pushReplacementNamed(context, '/home');
   }
@@ -97,21 +115,43 @@ class LoginScreen extends StatelessWidget {
 
               const SizedBox(height: 32),
 
-              // Mock Input Fields
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Student / Staff Email',
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-                ),
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  hintText: 'Password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+              // Form with Validation
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        hintText: 'Student / Staff Email',
+                        prefixIcon: const Icon(Icons.email_outlined),
+                        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter your email';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 14),
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        hintText: 'Password',
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter your password';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
                 ),
               ),
 
@@ -119,7 +159,7 @@ class LoginScreen extends StatelessWidget {
 
               // Login Button
               ElevatedButton.icon(
-                onPressed: () => _onLogin(context),
+                onPressed: _onLogin,
                 icon: const Icon(Icons.login_rounded),
                 label: const Text(
                   'Student / Staff Login',
@@ -137,7 +177,7 @@ class LoginScreen extends StatelessWidget {
 
               // Guest Access Button
               OutlinedButton.icon(
-                onPressed: () => _onGuestAccess(context),
+                onPressed: _onGuestAccess,
                 icon: const Icon(Icons.person_outline_rounded),
                 label: const Text(
                   'Continue as Guest',
