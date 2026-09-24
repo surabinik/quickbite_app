@@ -251,4 +251,4 @@ Comprehensive manual test plan with 9 test cases is detailed in `TEST_PLAN.md`. 
 ---
 
 ## 11. GitHub Repository Link
-[Insert Your GitHub Repository Link Here]
+https://github.com/surabinik/quickbite_app.git
